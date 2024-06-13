@@ -1,24 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
+  name: argocd-server
+  namespace: argocd
   labels:
-    app: nginx
-  name: nginx
-  namespace: dev
+    app: argocd
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: nginx
-  strategy: {}
+      app: argocd-server
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        app: nginx
+        app: argocd-server
     spec:
       containers:
-      - image: nginx
-        name: nginx
-        resources: {}
+        - name: argocd-server
+          image: argoproj/argocd:v2.3.2
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ARGOCD_SERVER_INSECURE
+              value: "true"
+          volumeMounts:
+            - name: argocd-config
+              mountPath: /etc/argocd
+      volumes:
+        - name: argocd-config
+          configMap:
+            name: argocd-config
